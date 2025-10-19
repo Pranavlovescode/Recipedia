@@ -1,3 +1,14 @@
+CREATE TABLE "favorites" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"user_id" integer NOT NULL,
+	"recipe_id" integer NOT NULL,
+	"title" text NOT NULL,
+	"image" text,
+	"cook_time" text,
+	"servings" text,
+	"created_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
 CREATE TABLE "recipes" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"owner_id" text NOT NULL,
@@ -16,9 +27,10 @@ CREATE TABLE "recipes" (
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"id" text PRIMARY KEY NOT NULL,
-	"display_name" text,
-	"email" text,
+	"id" serial PRIMARY KEY NOT NULL,
+	"display_name" text NOT NULL,
+	"email" text NOT NULL,
+	"password" text,
 	"avatar_url" text,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now()

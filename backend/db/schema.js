@@ -12,9 +12,10 @@ import {
 
 // users
 export const usersTable = pgTable("users", {
-  id: text("id").primaryKey(), // external auth id
-  displayName: text("display_name"),
-  email: text("email"),
+  id: serial("id").primaryKey(), // external auth id (use text to match external auth providers)
+  displayName: text("display_name").notNull(),
+  email: text("email").notNull().unique(),
+  password:text("password"),
   avatarUrl: text("avatar_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -40,7 +41,7 @@ export const recipesTable = pgTable("recipes", {
 
 export const favoritesTable = pgTable("favorites", {
   id: serial("id").primaryKey(),
-  userId: text("user_id").notNull().references(()=>usersTable.id),
+  userId: integer("user_id").notNull().references(()=>usersTable.id),
   recipeId: integer("recipe_id").notNull().references(()=>recipesTable.id),
   title: text("title").notNull(),
   image: text("image"),
