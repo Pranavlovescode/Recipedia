@@ -10,6 +10,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
     "cors": "^2.8.5",
@@ -18,5 +19,8 @@
     "drizzle-orm": "^0.44.6",
     "express": "^5.1.0",
     "nodemon": "^3.1.10"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.5"
   }
 }
