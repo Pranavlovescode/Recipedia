@@ -15,6 +15,20 @@
       "when": 1760887110687,
       "tag": "0001_serious_magdalene",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761014524824,
+      "tag": "0002_rare_nebula",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1761014623265,
+      "tag": "0003_skinny_micromacro",
+      "breakpoints": true
     }
   ]
 }

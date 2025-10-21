@@ -4,10 +4,12 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { userRouter } from "./routes/user.js";
 import auth from "./middleware/auth.js";
-
+import { favoritesRouter } from "./routes/favourites.js";
+import job from "./config/cron.js";
 
 dotenv.config();
 const app = express();
+if (process.env.NODE_ENV === "production") job.start();
 
 // middleware
 app.use(cors());
@@ -15,7 +17,8 @@ app.use(express.json());
 
 // routes
 app.use("/user", userRouter);
-app.use(auth);
+app.use("/favourite",favoritesRouter);
+// app.use(auth);
 
 // test endpoint
 app.get("/test", (req, res) => {

@@ -71,7 +71,7 @@ userRouter.post("/login", async (req, res) => {
     }
 
     const secret = process.env.JWT_SECRET || "notvisibletoyou";
-    const token = jwt.sign({ sub: user.id, email: user.email }, secret, {
+    const token = jwt.sign({ user_id: user.id, email: user.email }, secret, {
       expiresIn: "10y",
     });
 
@@ -85,7 +85,7 @@ userRouter.post("/login", async (req, res) => {
   }
 });
 
-userRouter.get("/get-user", auth, async (req, res) => {
+userRouter.get("/get-user", async (req, res) => {
   try {
     const { email } = req.query;
     if (email == null)
@@ -105,6 +105,57 @@ userRouter.get("/get-user", auth, async (req, res) => {
     return res.status(200).json({ user: existingUser[0] });
   } catch (error) {
     console.error(err);
+    return res.status(500).json({ error: "internal error" });
+  }
+});
+
+userRouter.patch("/change-info", async (req, res) => {
+  try {
+    const userId = req.user?.user_id;
+    if (!userId) return res.status(401).json({ error: "unauthenticated" });
+
+    const { email, displayName, password, avatarUrl } = req.body || {};
+
+    if (!email && !displayName && !password && !avatarUrl) {
+      return res.status(400).json({ error: "no fields to update" });
+    }
+
+    // if email is being updated, ensure it's not already taken by another user
+    if (email) {
+      const rows = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.email, email));
+      if (rows.length > 0 && Number(rows[0].id) !== Number(userId)) {
+        return res.status(400).json({ error: "email already in use" });
+      }
+    }
+
+    const updates = {};
+    if (displayName != null) updates.displayName = displayName;
+    if (email != null) updates.email = email;
+    if (avatarUrl != null) updates.avatarUrl = avatarUrl;
+    if (password != null) {
+      const saltRounds = 10;
+      updates.password = await bcrypt.hash(password, saltRounds);
+    }
+    updates.updatedAt = new Date();
+
+    const result = await db
+      .update(usersTable)
+      .set(updates)
+      .where(eq(usersTable.id, Number(userId)))
+      .returning();
+
+    if (!result || result.length === 0) {
+      return res.status(404).json({ error: "user not found" });
+    }
+
+    const updated = result[0];
+    
+    return res.status(200).json({ msg: "user updated", user: updated });
+  } catch (error) {
+    console.error(error);
     return res.status(500).json({ error: "internal error" });
   }
 });

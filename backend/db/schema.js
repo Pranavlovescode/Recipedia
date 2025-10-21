@@ -24,7 +24,7 @@ export const usersTable = pgTable("users", {
 /* recipes */
 export const recipesTable = pgTable("recipes", {
   id: serial("id").primaryKey(),
-  ownerId: text("owner_id").notNull(),
+  ownerId: integer("owner_id").notNull().references(()=>usersTable.id),
   title: text("title").notNull(),
   description: text("description"),
   servings: text("servings"),
@@ -42,7 +42,7 @@ export const recipesTable = pgTable("recipes", {
 export const favoritesTable = pgTable("favorites", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(()=>usersTable.id),
-  recipeId: integer("recipe_id").notNull().references(()=>recipesTable.id),
+  recipeId: integer("recipe_id").notNull(),
   title: text("title").notNull(),
   image: text("image"),
   cookTime: text("cook_time"),
