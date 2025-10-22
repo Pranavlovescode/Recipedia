@@ -117,7 +117,7 @@ userRouter.get("/get-user", async (req, res) => {
   }
 });
 
-userRouter.patch("/change-info", async (req, res) => {
+userRouter.patch("/change-info", auth,async (req, res) => {
   try {
     const userId = req.user?.user_id;
     if (!userId) return res.status(401).json({ error: "unauthenticated" });

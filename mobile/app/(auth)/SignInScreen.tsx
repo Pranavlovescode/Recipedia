@@ -12,11 +12,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 import { Image } from "expo-image";
-
 import { authStyles } from "../../assets/styles/auth.styles";
 import { COLORS } from "../../constants/colors";
+import axios from "axios";
+import * as secureStore from "expo-secure-store";
 
 const SignInScreen = () => {
   const router = useRouter();
@@ -39,17 +39,42 @@ const SignInScreen = () => {
     setLoading(true);
 
     try {
+
+      const response = await axios.post(
+        `${process.env.EXPO_PUBLIC_API_URL}/user/login`,
+        {
+          email: email,
+          password: password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Token", response.data.token);
+      
+
       const signInAttempt = await signIn.create({
         identifier: email,
         password,
       });
 
-      if (signInAttempt.status === "complete") {
+      
+
+      if (response.status === 200 && signInAttempt.status === "complete") {
+        await secureStore.setItemAsync("token", response.data.token);
         await setActive({ session: signInAttempt.createdSessionId });
       } else {
         Alert.alert("Error", "Sign in failed. Please try again.");
-        console.error(JSON.stringify(signInAttempt, null, 2));
+        console.error(JSON.stringify("Error while logging in"));
       }
+      // if (signInAttempt.status === "complete") {
+      //   await setActive({ session: signInAttempt.createdSessionId });
+      // } else {
+      //   Alert.alert("Error", "Sign in failed. Please try again.");
+      //   console.error(JSON.stringify(signInAttempt, null, 2));
+      // }
     } catch (err) {
       Alert.alert(
         "Error",
@@ -121,12 +146,17 @@ const SignInScreen = () => {
             </View>
 
             <TouchableOpacity
-              style={[authStyles.authButton, loading && authStyles.buttonDisabled]}
+              style={[
+                authStyles.authButton,
+                loading && authStyles.buttonDisabled,
+              ]}
               onPress={handleSignIn}
               disabled={loading}
               activeOpacity={0.8}
             >
-              <Text style={authStyles.buttonText}>{loading ? "Signing In..." : "Sign In"}</Text>
+              <Text style={authStyles.buttonText}>
+                {loading ? "Signing In..." : "Sign In"}
+              </Text>
             </TouchableOpacity>
 
             {/* Sign Up Link */}
@@ -135,7 +165,8 @@ const SignInScreen = () => {
               onPress={() => router.push("/(auth)/SignupScreen")}
             >
               <Text style={authStyles.linkText}>
-                Don&apos;t have an account? <Text style={authStyles.link}>Sign up</Text>
+                Don&apos;t have an account?{" "}
+                <Text style={authStyles.link}>Sign up</Text>
               </Text>
             </TouchableOpacity>
           </View>

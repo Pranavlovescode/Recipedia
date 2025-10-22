@@ -7,7 +7,7 @@ import auth from "../middleware/auth.js";
 const favoritesRouter = Router();
 
 // Get all favourite recipes for the authenticated user
-favoritesRouter.get('/all', async (req, res) => {
+favoritesRouter.get('/all', auth,async (req, res) => {
     try {
         const userId = req.user?.user_id;
         if (!userId) return res.status(401).json({ error: "unauthenticated" });
@@ -23,7 +23,7 @@ favoritesRouter.get('/all', async (req, res) => {
 });
 
 // Add a recipe to favourites
-favoritesRouter.post('/add', async (req, res) => {
+favoritesRouter.post('/add', auth,async (req, res) => {
     try {
         const userId = req.user?.user_id;
         const { recipeId } = req.body || {};
@@ -49,7 +49,7 @@ favoritesRouter.post('/add', async (req, res) => {
 });
 
 // Remove a recipe from favourites
-favoritesRouter.delete('/remove', async (req, res) => {
+favoritesRouter.delete('/remove', auth,async (req, res) => {
     try {
         const userId = req.user?.user_id;
         const { recipeId } = req.body || {};
