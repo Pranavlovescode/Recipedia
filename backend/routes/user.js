@@ -10,9 +10,14 @@ const userRouter = Router();
 
 userRouter.post("/register", async (req, res) => {
   try {
-    const { email, name, password } = req.body || {};
-    if (!email || !password) {
-      return res.status(400).json({ error: "email and password required" });
+    console.log("Registration request body:", req.body);
+    const { email, name, password, displayName } = req.body || {};
+    // require email, password and either name or displayName (frontend may send either)
+    if (!email || !password || !(name ?? displayName)) {
+      console.log("Missing required fields:", { email, password, name, displayName });
+      return res
+        .status(400)
+        .json({ error: "email, password and name/displayName required" });
     }
 
     const saltRounds = 10;
@@ -29,22 +34,25 @@ userRouter.post("/register", async (req, res) => {
         .json({ msg: "User with this email already exists" });
     }
 
+    console.log("Inserting new user with email:", email);
     const result = await db
       .insert(usersTable)
       .values({
         email: email,
         password: hashPassword,
-        displayName: name ?? null,
+        displayName: name ?? displayName,
         createdAt: new Date(),
       })
       .returning();
 
+    console.log("User created successfully:", result);
     return res.status(201).json({ msg: "The user is created", result });
   } catch (error) {
-    console.error(error);
+    console.error("Error in /register endpoint:", error.message);
+    console.error("Full error details:", error);
     return res
       .status(500)
-      .json({ error: "some error occurred while creating user" });
+      .json({ error: "Error creating user: " + error.message });
   }
 });
 

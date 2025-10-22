@@ -14,7 +14,7 @@ import { useState } from "react";
 import { authStyles } from "../../assets/styles/auth.styles";
 import { Image } from "expo-image";
 import { COLORS } from "../../constants/colors";
-
+import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
 import VerifyEmail from "./VerifyEmailScreen";
 
@@ -23,13 +23,16 @@ const SignUpScreen = () => {
   const { isLoaded, signUp } = useSignUp();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
 
   const handleSignUp = async () => {
-    if (!email || !password) return Alert.alert("Error", "Please fill in all fields");
-    if (password.length < 6) return Alert.alert("Error", "Password must be at least 6 characters");
+    if (!email || !password || !name)
+      return Alert.alert("Error", "Please fill in all fields");
+    if (password.length < 6)
+      return Alert.alert("Error", "Password must be at least 6 characters");
 
     if (!isLoaded) return;
 
@@ -39,18 +42,46 @@ const SignUpScreen = () => {
       await signUp.create({ emailAddress: email, password });
 
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-
+      const formData = {
+        name: name,
+        email: email,
+        password: password,
+      };
+      console.log("formData", formData);
+      console.log("production url",process.env.EXPO_PUBLIC_API_URL)
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/user/register`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            name: name,
+            email: email,
+            password: password,
+          }),
+          headers: {
+            "Content-type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) throw new Error(`Response status ${response.status}`);
+      console.log("response signup", response.json());
       setPendingVerification(true);
     } catch (err) {
-      Alert.alert("Error", err.errors?.[0]?.message || "Failed to create account");
-      console.error(JSON.stringify(err, null, 2));
+      const errorMessage =
+        err instanceof Error
+          ? (err as any)?.errors?.[0]?.message || err.message
+          : "Failed to create account";
+      Alert.alert("Error", errorMessage);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   if (pendingVerification)
-    return <VerifyEmail email={email} onBack={() => setPendingVerification(false)} />;
+    return (
+      <VerifyEmail email={email} onBack={() => setPendingVerification(false)} />
+    );
 
   return (
     <View style={authStyles.container}>
@@ -87,6 +118,18 @@ const SignUpScreen = () => {
                 autoCapitalize="none"
               />
             </View>
+            {/* Name Input */}
+            <View style={authStyles.inputContainer}>
+              <TextInput
+                style={authStyles.textInput}
+                placeholder="Enter name"
+                placeholderTextColor={COLORS.textLight}
+                value={name}
+                onChangeText={setName}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
 
             {/* Password Input */}
             <View style={authStyles.inputContainer}>
@@ -113,7 +156,10 @@ const SignUpScreen = () => {
 
             {/* Sign Up Button */}
             <TouchableOpacity
-              style={[authStyles.authButton, loading && authStyles.buttonDisabled]}
+              style={[
+                authStyles.authButton,
+                loading && authStyles.buttonDisabled,
+              ]}
               onPress={handleSignUp}
               disabled={loading}
               activeOpacity={0.8}
@@ -124,9 +170,13 @@ const SignUpScreen = () => {
             </TouchableOpacity>
 
             {/* Sign In Link */}
-            <TouchableOpacity style={authStyles.linkContainer} onPress={() => router.back()}>
+            <TouchableOpacity
+              style={authStyles.linkContainer}
+              onPress={() => router.back()}
+            >
               <Text style={authStyles.linkText}>
-                Already have an account? <Text style={authStyles.link}>Sign In</Text>
+                Already have an account?{" "}
+                <Text style={authStyles.link}>Sign In</Text>
               </Text>
             </TouchableOpacity>
           </View>

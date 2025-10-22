@@ -13,7 +13,12 @@ import {
 import { authStyles } from "../../assets/styles/auth.styles";
 import { Image } from "expo-image";
 import { COLORS } from "../../constants/colors";
-const VerifyEmailScreen = ({ email, onBack }) => {
+interface VerifyEmailScreenProps {
+  email: string;
+  onBack: () => void;
+}
+
+const VerifyEmailScreen = ({ email, onBack }: VerifyEmailScreenProps) => {
   const { isLoaded, signUp, setActive } = useSignUp();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);

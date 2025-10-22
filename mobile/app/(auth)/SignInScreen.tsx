@@ -51,7 +51,10 @@ const SignInScreen = () => {
         console.error(JSON.stringify(signInAttempt, null, 2));
       }
     } catch (err) {
-      Alert.alert("Error", err!.errors?.[0]?.message || "Sign in failed");
+      Alert.alert(
+        "Error",
+        (err as any)?.errors?.[0]?.message || "Sign in failed"
+      );
       console.error(JSON.stringify(err, null, 2));
     } finally {
       setLoading(false);
