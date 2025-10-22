@@ -15,6 +15,8 @@ import RecipeCard from "../../components/RecipeCard";
 import NoFavoritesFound from "../../components/NoFavoritesFound";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { useRouter } from "expo-router";
+import * as secureStore from "expo-secure-store";
+import axios from "axios";
 
 const FavoritesScreen = () => {
   const { signOut } = useClerk();
@@ -22,15 +24,21 @@ const FavoritesScreen = () => {
   const [favoriteRecipes, setFavoriteRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
-  const router = useRouter()
+  const router = useRouter();
+  const token = secureStore.getItem("token")
   useEffect(() => {
     const loadFavorites = async () => {
       try {
-        const response = await fetch(`${API_URL}/favorites/${user.id}`);
-        if (!response.ok) throw new Error("Failed to fetch favorites");
-
-        const favorites = await response.json();
-
+        const response = await axios.get(`${API_URL}/favourite/all`,{
+          headers:{
+            "Authorization":`Bearer ${token}`
+          }
+        });
+        // console.log(response.status)
+        if (!response.status === 200) throw new Error("Failed to fetch favorites");
+        // console.log(response.data);
+        const favorites = await response.data;
+        console.log("favourite recipes",favorites)
         // transform the data to match the RecipeCard component's expected format
         const transformedFavorites = favorites.map((favorite) => ({
           ...favorite,

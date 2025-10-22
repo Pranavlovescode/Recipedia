@@ -12,6 +12,8 @@ import { COLORS } from "../../constants/colors";
 
 import { Ionicons } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
+import * as SecureStore from "expo-secure-store";
+import axios from "axios";
 
 const RecipeDetailScreen = () => {
   const { id: recipeId } = useLocalSearchParams();
@@ -24,12 +26,29 @@ const RecipeDetailScreen = () => {
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
   const { user } = useUser();
   const userId = user?.id;
-
+  const [token, setToken] = useState(null);
+  
+  useEffect(() => {
+    const getToken = async () => {
+      const storedToken = await SecureStore.getItemAsync("token");
+      setToken(storedToken);
+      console.log("stored token: ", storedToken);
+    };
+    
+    getToken();
+  }, []);
   useEffect(() => {
     const checkIfSaved = async () => {
+      if (!token || !userId) return;
+      
       try {
-        const response = await fetch(`${API_URL}/favorites/${userId}`);
-        const favorites = await response.json();
+        const response = await axios.get(`${API_URL}/favourite/all`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        const favorites = response.data;
         const isRecipeSaved = favorites.some(
           (fav) => fav.recipeId === parseInt(recipeId)
         );
@@ -60,9 +79,11 @@ const RecipeDetailScreen = () => {
       }
     };
 
-    checkIfSaved();
     loadRecipeDetail();
-  }, [recipeId, userId]);
+    if (token) {
+      checkIfSaved();
+    }
+  }, [recipeId, userId, token]);
 
   const getYouTubeEmbedUrl = (url) => {
     // example url: https://www.youtube.com/watch?v=mTvlmY4vCug
@@ -71,39 +92,50 @@ const RecipeDetailScreen = () => {
   };
 
   const handleToggleSave = async () => {
+    if (!token) {
+      Alert.alert("Error", "You need to be logged in to save recipes");
+      return;
+    }
+
     setIsSaving(true);
 
     try {
       if (isSaved) {
         // remove from favorites
-        const response = await fetch(
-          `${API_URL}/favorites/${userId}/${recipeId}`,
-          {
-            method: "DELETE",
+        const response = await axios.delete(`${API_URL}/favourite/remove`, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          data: {
+            recipeId: parseInt(recipeId)
           }
-        );
-        if (!response.ok) throw new Error("Failed to remove recipe");
-
+        });
+        
+        if (response.status !== 200) throw new Error("Failed to remove recipe");
         setIsSaved(false);
       } else {
         // add to favorites
-        const response = await fetch(`${API_URL}/favorites`, {
-          method: "POST",
+        const formData = {
+          userId,
+          recipeId: parseInt(recipeId),
+          title: recipe.title,
+          image: recipe.image,
+          cookTime: recipe.cookTime,
+          servings: recipe.servings,
+        };
+        
+        console.log("favorites form data: ", formData);
+        const response = await axios.post(`${API_URL}/favourite/add`, formData, {
           headers: {
             "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId,
-            recipeId: parseInt(recipeId),
-            title: recipe.title,
-            image: recipe.image,
-            cookTime: recipe.cookTime,
-            servings: recipe.servings,
-          }),
+            "Authorization": `Bearer ${token}`
+          }
         });
-
-        if (!response.ok) throw new Error("Failed to save recipe");
-        setIsSaved(true);
+        
+        console.log("favorite response: ", response);
+        if (response.status !== 201) throw new Error("Failed to save recipe");
+        setIsSaved(true)
       }
     } catch (error) {
       console.error("Error toggling recipe save:", error);
