@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
 import * as SecureStore from "expo-secure-store";
 import axios from "axios";
+import Constants from "expo-constants"
 
 const RecipeDetailScreen = () => {
   const { id: recipeId } = useLocalSearchParams();
@@ -23,7 +24,7 @@ const RecipeDetailScreen = () => {
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const API_URL = process.env.EXPO_PUBLIC_API_URL;
+  const API_URL = Constants.expoConfig.extra.apiUrl;
   const { user } = useUser();
   const userId = user?.id;
   const [token, setToken] = useState(null);

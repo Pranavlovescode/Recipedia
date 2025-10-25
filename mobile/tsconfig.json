@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "components/SafeScreen.jsx", "components/LoadingSpinner.jsx", "components/CategoryFilter.jsx", "app/(tabs)/index.jsx", "app/(tabs)/_layout.jsx"  ]
+, "components/SafeScreen.jsx", "components/LoadingSpinner.jsx", "components/CategoryFilter.jsx", "app/(tabs)/index.jsx", "app/(tabs)/_layout.jsx", "app/(auth)/SignupScreen.tj", "app/(auth)/SignInScreen.jsx", "app/(auth)/_layout.jsx", "app/(auth)/VerifyEmailScreen.jsx", "app/_layout.jsx"  ]
 }

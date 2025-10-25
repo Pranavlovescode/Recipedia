@@ -17,13 +17,14 @@ import LoadingSpinner from "../../components/LoadingSpinner";
 import { useRouter } from "expo-router";
 import * as secureStore from "expo-secure-store";
 import axios from "axios";
+import Constants from "expo-constants"
 
 const FavoritesScreen = () => {
   const { signOut } = useClerk();
   const { user } = useUser();
   const [favoriteRecipes, setFavoriteRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API_URL = process.env.EXPO_PUBLIC_API_URL;
+  const API_URL = Constants.expoConfig.extra.apiUrl;
   const router = useRouter();
   const token = secureStore.getItem("token")
   useEffect(() => {

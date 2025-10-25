@@ -17,8 +17,10 @@ import { COLORS } from "../../constants/colors";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
 import VerifyEmail from "./VerifyEmailScreen";
+import Constants from "expo-constants"
 
 const SignUpScreen = () => {
+  const API_URL = Constants.expoConfig.extra.apiUrl;
   const router = useRouter();
   const { isLoaded, signUp } = useSignUp();
   const [email, setEmail] = useState("");
@@ -48,9 +50,9 @@ const SignUpScreen = () => {
         password: password,
       };
       console.log("formData", formData);
-      console.log("production url",process.env.EXPO_PUBLIC_API_URL)
+      console.log("production url",API_URL)
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/user/register`,
+        `${API_URL}/user/register`,
         {
           method: "POST",
           body: JSON.stringify({
@@ -68,9 +70,7 @@ const SignUpScreen = () => {
       setPendingVerification(true);
     } catch (err) {
       const errorMessage =
-        err instanceof Error
-          ? (err as any)?.errors?.[0]?.message || err.message
-          : "Failed to create account";
+        err?.errors?.[0]?.message || err?.message || "Failed to create account";
       Alert.alert("Error", errorMessage);
       console.error(err);
     } finally {

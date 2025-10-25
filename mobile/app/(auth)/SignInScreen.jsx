@@ -17,6 +17,7 @@ import { authStyles } from "../../assets/styles/auth.styles";
 import { COLORS } from "../../constants/colors";
 import axios from "axios";
 import * as secureStore from "expo-secure-store";
+import Constants from "expo-constants"
 
 const SignInScreen = () => {
   const router = useRouter();
@@ -27,6 +28,7 @@ const SignInScreen = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const API_URL = Constants.expoConfig.extra.apiUrl;
 
   const handleSignIn = async () => {
     if (!email || !password) {
@@ -41,7 +43,7 @@ const SignInScreen = () => {
     try {
 
       const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_API_URL}/user/login`,
+        `${API_URL}/user/login`,
         {
           email: email,
           password: password,
@@ -78,7 +80,7 @@ const SignInScreen = () => {
     } catch (err) {
       Alert.alert(
         "Error",
-        (err as any)?.errors?.[0]?.message || "Sign in failed"
+        (err)?.errors?.[0]?.message || "Sign in failed"
       );
       console.error(JSON.stringify(err, null, 2));
     } finally {

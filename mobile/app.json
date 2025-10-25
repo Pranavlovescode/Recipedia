@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Recipedia",
+    "slug": "recipedia",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -53,7 +53,9 @@
       "router": {},
       "eas": {
         "projectId": "b3d92482-7465-4b6b-a70a-a70e6d238107"
-      }
+      },
+      "clerkPublishableKey":"pk_test_c2F2ZWQtZ3J1Yi00MS5jbGVyay5hY2NvdW50cy5kZXYk",
+      "apiUrl":"https://recipedia-oa0r.onrender.com"
     }
   }
 }
