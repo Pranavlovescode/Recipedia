@@ -26,10 +26,11 @@ const FavoritesScreen = () => {
   const [loading, setLoading] = useState(true);
   const API_URL = Constants.expoConfig.extra.apiUrl;
   const router = useRouter();
-  const token = secureStore.getItem("token")
+  
   useEffect(() => {
     const loadFavorites = async () => {
       try {
+        const token = await secureStore.getItemAsync("token")
         const response = await axios.get(`${API_URL}/favourite/all`,{
           headers:{
             "Authorization":`Bearer ${token}`

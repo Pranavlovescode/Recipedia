@@ -34,13 +34,7 @@ userRouter.post("/register", async (req, res) => {
         .json({ msg: "User with this email already exists" });
     }
 
-
-
     console.log("Inserting new user with email:", email);
-    const secret = process.env.JWT_SECRET || "notvisibletoyou";
-    const token = jwt.sign({ user_id: user.id, email: user.email }, secret, {
-      expiresIn: "10y",
-    });
     const result = await db
       .insert(usersTable)
       .values({
@@ -50,7 +44,11 @@ userRouter.post("/register", async (req, res) => {
         createdAt: new Date(),
       })
       .returning();
-
+    const secret = process.env.JWT_SECRET || "notvisibletoyou";
+    const token = jwt.sign({ user_id: result.id, email: result.email }, secret, {
+      expiresIn: "10y",
+    });
+    
     console.log("User created successfully:", result);
     return res.status(201).json({ msg: "The user is created", result,token });
   } catch (error) {

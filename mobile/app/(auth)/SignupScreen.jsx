@@ -17,7 +17,8 @@ import { COLORS } from "../../constants/colors";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
 import VerifyEmail from "./VerifyEmailScreen";
-import Constants from "expo-constants"
+import Constants from "expo-constants";
+import * as SecureStore from "expo-secure-store";
 
 const SignUpScreen = () => {
   const API_URL = Constants.expoConfig.extra.apiUrl;
@@ -51,22 +52,32 @@ const SignUpScreen = () => {
       };
       console.log("formData", formData);
       console.log("production url",API_URL)
-      const response = await fetch(
-        `${API_URL}/user/register`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            name: name,
-            email: email,
-            password: password,
-          }),
-          headers: {
-            "Content-type": "application/json",
-          },
+      // const response = await fetch(
+      //   `${API_URL}/user/register`,
+      //   {
+      //     method: "POST",
+      //     body: JSON.stringify({
+      //       name: name,
+      //       email: email,
+      //       password: password,
+      //     }),
+      //     headers: {
+      //       "Content-type": "application/json",
+      //     },
+      //   }
+      // );
+      const response = await axios.post(`${API_URL}/user/register`,{
+        name:name,
+        email:email,
+        password:password
+      },{
+        headers:{
+          "Content-Type":"application/json"
         }
-      );
-      if (!response.ok) throw new Error(`Response status ${response.status}`);
-      console.log("response signup", response.json());
+      })
+      if (response.status !== 201) throw new Error(`Response status ${response.status}`);
+      console.log("response signup", response.data);
+      await SecureStore.setItemAsync("token",response.data.token);
       setPendingVerification(true);
     } catch (err) {
       const errorMessage =
