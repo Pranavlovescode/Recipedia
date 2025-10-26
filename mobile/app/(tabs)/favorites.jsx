@@ -66,6 +66,8 @@ const FavoritesScreen = () => {
         style: "destructive",
         onPress: async () => {
           try {
+            await secureStore.deleteItemAsync("token")
+            console.log("Deleted stored token")
             await signOut();
             router.replace('/(auth)/SignInScreen')
           } catch (err) {
